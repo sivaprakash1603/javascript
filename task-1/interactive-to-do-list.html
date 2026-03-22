@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive To-Do List</title>
+    <script>
+        document.addEventListener('DOMContentLoaded',()=>{
+            const taskInput = document.getElementById('taskInput');
+            const addTaskButton = document.getElementById('addTaskButton');
+            const taskList = document.getElementById('taskList');
+            
+            const todosArray=JSON.parse(localStorage.getItem('todos')) || [];
+
+            addTaskButton.addEventListener('click',()=>{
+                const taskText=taskInput.value.trim();
+                if(taskText){
+                    const newTask={text:taskText,done:"false"};
+                    todosArray.push(newTask);
+                    localStorage.setItem('todos',JSON.stringify(todosArray));
+                    taskInput.value='';
+                    location.reload();
+                }
+            });
+
+            todosArray.forEach(element => {
+                const li =document.createElement('li');
+                li.textContent=element.text;
+                li.style.padding="10px";
+                li.style.listStyleType="none";
+                console.log(element.text);
+                console.log(element.done);
+
+                const editButton=document.createElement('button');
+                editButton.textContent="Edit";
+                editButton.style.marginLeft="10px";
+                editButton.addEventListener('click',()=>{
+                    const newText=prompt("Edit task:",element.text);
+                    if(newText){
+                        element.text=newText;
+                        localStorage.setItem('todos',JSON.stringify(todosArray));
+                        li.firstChild.textContent=newText;
+                    }
+                });
+                li.appendChild(editButton);
+
+                if(element.done=="true"){
+                    li.style.textDecoration="line-through";
+                }
+                else{
+                    const markDoneButton=document.createElement('button');
+                    markDoneButton.style.marginLeft="10px";
+                    markDoneButton.textContent="Mark as Done";
+                    markDoneButton.addEventListener('click',()=>{
+                        li.style.textDecoration="line-through";
+                        element.done="true";
+                        localStorage.setItem('todos',JSON.stringify(todosArray));
+                        li.removeChild(markDoneButton);
+                    });
+                    li.appendChild(markDoneButton);
+
+                }
+                const deleteButton=document.createElement('button');
+                deleteButton.textContent="Delete";
+                deleteButton.style.marginLeft="10px";
+                deleteButton.addEventListener('click',()=>{
+                    taskList.removeChild(li);
+                    const index=todosArray.indexOf(element);
+                    if(index>-1){
+                        todosArray.splice(index,1);
+                        localStorage.setItem('todos',JSON.stringify(todosArray));
+                    }
+                });
+                li.appendChild(deleteButton);
+                taskList.appendChild(li);
+
+            });
+
+
+            
+
+        })
+    </script>
+</head>
+<body>
+    <h1>Interactive To-Do List</h1>
+    <input type="text" id="taskInput" placeholder="Enter a new task">
+    <button id="addTaskButton">Add Task</button>
+    <ul id="taskList"></ul>
+
+    
+</body>
+</html>
