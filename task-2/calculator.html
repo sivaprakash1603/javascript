@@ -27,6 +27,10 @@
                     display.textContent="Error";
                 }
             });
+            const CEButton=document.getElementById('CE');
+            CEButton.addEventListener('click',()=>{
+                display.textContent='';
+            });
         });
     </script>
     <style>
@@ -39,12 +43,23 @@
             text-align:right;
             padding:5px;
         }
+        #buttons #CE{
+            width:98px;
+            background-color: red;
+            color: white;
+        }
+        
+        #buttons #equals{
+            background-color: green;
+            color: white;
+        }
         #buttons button{
             width:45px;
             height:45px;
             font-size:18px;
             margin:2px;
         }
+        
     </style>
 </head>
 <body>
@@ -70,6 +85,10 @@
         <button data-value=".">.</button>
         <button id="equals">=</button>
         <button data-value="+">+</button>
+        <br>
+        <button data-value="(">(</button>
+        <button data-value=")">)</button>
+        <button id="CE">CE</button>
     </div>
 
 </body>
