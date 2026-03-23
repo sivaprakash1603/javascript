@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "question": "What is the output of 2 + '2' in JavaScript?",
+    "options": ["4", "22", "NaN", "undefined"],
+    "correctAnswer": "22",
+    "explanation": "JavaScript performs string concatenation when a number is added to a string."
+  },
+  {
+    "id": 2,
+    "question": "Which method is used to store data in localStorage?",
+    "options": ["getItem()", "setItem()", "store()", "save()"],
+    "correctAnswer": "setItem()",
+    "explanation": "localStorage.setItem(key, value) is used to store data."
+  },
+  {
+    "id": 3,
+    "question": "What does DOM stand for?",
+    "options": ["Document Object Model", "Data Object Model", "Digital Output Mode", "Display Object Management"],
+    "correctAnswer": "Document Object Model",
+    "explanation": "DOM represents the structure of HTML as objects."
+  },
+  {
+    "id": 4,
+    "question": "Which event fires when HTML is fully loaded?",
+    "options": ["load", "DOMContentLoaded", "ready", "onloadstart"],
+    "correctAnswer": "DOMContentLoaded",
+    "explanation": "It fires after the HTML is parsed, without waiting for images."
+  },
+  {
+    "id": 5,
+    "question": "How do you convert an object to JSON string?",
+    "options": ["JSON.parse()", "JSON.stringify()", "JSON.convert()", "JSON.toString()"],
+    "correctAnswer": "JSON.stringify()",
+    "explanation": "JSON.stringify() converts an object into a JSON string."
+  },
+  {
+    "id": 6,
+    "question": "Which keyword is used to declare a variable in JavaScript?",
+    "options": ["var", "let", "const", "All of the above"],
+    "correctAnswer": "All of the above",
+    "explanation": "var, let, and const are all used to declare variables."
+  },
+  {
+    "id": 7,
+    "question": "What is the result of typeof null?",
+    "options": ["null", "object", "undefined", "string"],
+    "correctAnswer": "object",
+    "explanation": "This is a known JavaScript bug where typeof null returns 'object'."
+  },
+  {
+    "id": 8,
+    "question": "Which function converts JSON string to object?",
+    "options": ["JSON.parse()", "JSON.stringify()", "JSON.toObject()", "JSON.convert()"],
+    "correctAnswer": "JSON.parse()",
+    "explanation": "JSON.parse() converts a JSON string into a JavaScript object."
+  },
+  {
+    "id": 9,
+    "question": "Which symbol is used for comments in JavaScript (single line)?",
+    "options": ["//", "/* */", "#", "<!-- -->"],
+    "correctAnswer": "//",
+    "explanation": "// is used for single-line comments."
+  },
+  {
+    "id": 10,
+    "question": "What will Boolean('false') return?",
+    "options": ["false", "true", "undefined", "NaN"],
+    "correctAnswer": "true",
+    "explanation": "Non-empty strings are always truthy in JavaScript, even 'false'."
+  }
+]
