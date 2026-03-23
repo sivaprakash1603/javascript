@@ -1,52 +1,53 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Weather App</title>
     <script>
-        document.addEventListener('DOMContentLoaded',()=>{
-            const apiKey ="39e5094035bb44df9f5163110262303";
-            const weatherInfo=document.getElementById('weatherInfo');
-            if('geolocation' in navigator){
-                navigator.geolocation.getCurrentPosition(position=>{
-                    const lat=position.coords.latitude;
-                    const lon=position.coords.longitude;
-                    console.log(`Latitude: ${lat}, Longitude: ${lon}`);
-                    fetch(`http://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${lat},${lon}`)
-                    .then(response=>response.json())
-                    .then(data=>{
-                        console.log(data);
-                        weatherInfo.innerHTML=`<h2>Current Weather</h2>
-                        <p>Location: ${data.location.name}</p>`
-                        +`<p>Temperature: ${data.current.temp_c} °C</p>`
-                        +`<p>Condition: ${data.current.condition.text}</p>`
-                        +`<p>Humidity: ${data.current.humidity}%</p>`
-                        +`<p>Wind Speed: ${data.current.wind_kph} kph</p>`;
-                    })
-                    .catch(error=>{
-                        console.error("Error fetching weather data:",error);
-                    });
-                },
-                error=>{
-                    console.error("Error getting location:",error);
-                },
+      document.addEventListener("DOMContentLoaded", () => {
+        const apiKey = "39e5094035bb44df9f5163110262303";
+        const weatherInfo = document.getElementById("weatherInfo");
+        if ("geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              const lat = position.coords.latitude;
+              const lon = position.coords.longitude;
+              console.log(`Latitude: ${lat}, Longitude: ${lon}`);
+              try {
+                const response = await fetch(
+                  `http://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${lat},${lon}`,
+                );
+                const data = await response.json();
+                console.log(data);
+                weatherInfo.innerHTML =
+                  `<h2>Current Weather</h2>
+                        <p>Location: ${data.location.name}</p>` +
+                  `<p>Temperature: ${data.current.temp_c} °C</p>` +
+                  `<p>Condition: ${data.current.condition.text}</p>` +
+                  `<p>Humidity: ${data.current.humidity}%</p>` +
+                  `<p>Wind Speed: ${data.current.wind_kph} kph</p>`;
+              } catch (error) {
+                console.error("Error fetching weather data:", error);
+              }
+            },
+            (error) => {
+              console.error("Error getting location:", error);
+            },
             {
-                    enableHighAccuracy:true,
-                    maximumAge:0
-                });
-            }else{
-                console.error("Geolocation is not supported by this browser.");
-            }
-        });
-
+              enableHighAccuracy: true,
+              maximumAge: 0,
+            },
+          );
+        } else {
+          console.error("Geolocation is not supported by this browser.");
+        }
+      });
     </script>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Weather App</h1>
     <p>Welcome to the Weather App!</p>
     <div id="weatherInfo"></div>
-    
-
-</body>
+  </body>
 </html>
