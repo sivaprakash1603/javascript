@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Gallery</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 0;
+      }
+      #gallery {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 10px;
+      }
+      .gallery-image {
+        width: 200px;
+        height: 150px;
+        margin: 10px;
+        cursor: pointer;
+        object-fit: cover;
+      }
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        opacity: 0;
+        transition: opacity 320ms ease;
+        z-index: 999;
+      }
+      .modal-overlay.visible {
+        opacity: 1;
+      }
+      .zoom-clone {
+        position: fixed;
+        z-index: 1000;
+        object-fit: cover;
+        transition:
+          top 320ms ease,
+          left 320ms ease,
+          width 320ms ease,
+          height 320ms ease;
+      }
+    </style>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const gallery = document.getElementById("gallery");
+        let activeModal = null;
+        const imageUrls = ["img-1.jpg", "img-2.jpg", "img-3.jpg", "img-4.jpg"];
+
+        function getTargetRect(naturalWidth, naturalHeight) {
+          const maxWidth = window.innerWidth * 0.9;
+          const maxHeight = window.innerHeight * 0.9;
+          const scale = Math.min(
+            maxWidth / naturalWidth,
+            maxHeight / naturalHeight,
+          );
+          const width = naturalWidth * scale;
+          const height = naturalHeight * scale;
+
+          return {
+            width,
+            height,
+            left: (window.innerWidth - width) / 2,
+            top: (window.innerHeight - height) / 2,
+          };
+        }
+
+        function openWithZoom(sourceImg) {
+          if (activeModal) {
+            return;
+          }
+
+          const fromRect = sourceImg.getBoundingClientRect();
+          const naturalWidth = sourceImg.naturalWidth || fromRect.width;
+          const naturalHeight = sourceImg.naturalHeight || fromRect.height;
+          const targetRect = getTargetRect(naturalWidth, naturalHeight);
+
+          const overlay = document.createElement("div");
+          overlay.className = "modal-overlay";
+
+          const zoomClone = document.createElement("img");
+          zoomClone.src = sourceImg.src;
+          zoomClone.className = "zoom-clone";
+          zoomClone.style.left = `${fromRect.left}px`;
+          zoomClone.style.top = `${fromRect.top}px`;
+          zoomClone.style.width = `${fromRect.width}px`;
+          zoomClone.style.height = `${fromRect.height}px`;
+
+          document.body.appendChild(overlay);
+          document.body.appendChild(zoomClone);
+          document.body.style.overflow = "hidden";
+
+          activeModal = { overlay, zoomClone, sourceImg, closing: false };
+
+          requestAnimationFrame(() => {
+            overlay.classList.add("visible");
+            zoomClone.style.left = `${targetRect.left}px`;
+            zoomClone.style.top = `${targetRect.top}px`;
+            zoomClone.style.width = `${targetRect.width}px`;
+            zoomClone.style.height = `${targetRect.height}px`;
+          });
+
+          const closeModal = () => {
+            if (!activeModal || activeModal.closing) {
+              return;
+            }
+
+            activeModal.closing = true;
+            const currentSourceRect = sourceImg.getBoundingClientRect();
+
+            overlay.classList.remove("visible");
+            zoomClone.style.left = `${currentSourceRect.left}px`;
+            zoomClone.style.top = `${currentSourceRect.top}px`;
+            zoomClone.style.width = `${currentSourceRect.width}px`;
+            zoomClone.style.height = `${currentSourceRect.height}px`;
+
+            const cleanup = () => {
+              overlay.remove();
+              zoomClone.remove();
+              document.body.style.overflow = "";
+              activeModal = null;
+            };
+
+            zoomClone.addEventListener("transitionend", cleanup, {
+              once: true,
+            });
+          };
+
+          overlay.addEventListener("click", closeModal);
+          zoomClone.addEventListener("click", closeModal);
+        }
+
+        imageUrls.forEach((url) => {
+          const img = document.createElement("img");
+          img.src = url;
+          img.className = "gallery-image";
+          gallery.appendChild(img);
+          img.addEventListener("click", () => {
+            openWithZoom(img);
+          });
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <h1>Image Gallery</h1>
+    <div id="gallery">
+      <!-- Images will be displayed here -->
+    </div>
+  </body>
+</html>
