@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Drag and Drop List</title>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const sortableList = document.getElementById("sortableList");
+        let draggedItem = null;
+
+        sortableList.addEventListener("dragstart", (e) => {
+          draggedItem = e.target;
+          e.dataTransfer.effectAllowed = "move";
+        });
+
+        sortableList.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+
+          // Find the closest LI element to highlight drop target
+          let afterElement = null;
+          const items = [...sortableList.querySelectorAll("li:not(.dragging)")];
+          const pageY = e.clientY;
+
+          for (let item of items) {
+            const box = item.getBoundingClientRect();
+            const boxCenterY = box.top + box.height / 2;
+
+            if (pageY < boxCenterY) {
+              afterElement = item;
+              break;
+            }
+          }
+
+          // Highlight the target
+          items.forEach((item) => item.classList.remove("drag-over"));
+          if (afterElement) {
+            afterElement.classList.add("drag-over");
+          }
+        });
+
+        sortableList.addEventListener("dragleave", (e) => {
+          document.querySelectorAll("#sortableList li").forEach((item) => {
+            item.classList.remove("drag-over");
+          });
+        });
+
+        sortableList.addEventListener("drop", (e) => {
+          e.preventDefault();
+          document.querySelectorAll("#sortableList li").forEach((item) => {
+            item.classList.remove("drag-over");
+          });
+
+          if (draggedItem) {
+            const afterElement = document.querySelector(
+              "#sortableList .drag-over",
+            );
+            if (afterElement) {
+              sortableList.insertBefore(draggedItem, afterElement);
+            } else {
+              sortableList.appendChild(draggedItem);
+            }
+          }
+          draggedItem = null;
+        });
+      });
+    </script>
+    <style>
+      #sortableList {
+        list-style-type: none;
+        padding: 0;
+        width: 200px;
+      }
+      #sortableList li {
+        padding: 10px;
+        margin: 5px;
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        cursor: move;
+        transition: background-color 0.2s;
+      }
+      #sortableList li.drag-over {
+        background-color: #e0e0ff;
+        border: 2px solid #4169e1;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <ul id="sortableList">
+        <li draggable="true">Item 1</li>
+        <li draggable="true">Item 2</li>
+        <li draggable="true">Item 3</li>
+        <li draggable="true">Item 4</li>
+        <li draggable="true">Item 5</li>
+      </ul>
+    </div>
+  </body>
+</html>
