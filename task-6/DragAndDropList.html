@@ -1,100 +1,189 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Drag and Drop List</title>
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const sortableList = document.getElementById("sortableList");
-        let draggedItem = null;
-
-        sortableList.addEventListener("dragstart", (e) => {
-          draggedItem = e.target;
-          e.dataTransfer.effectAllowed = "move";
-        });
-
-        sortableList.addEventListener("dragover", (e) => {
-          e.preventDefault();
-          e.dataTransfer.dropEffect = "move";
-
-          // Find the closest LI element to highlight drop target
-          let afterElement = null;
-          const items = [...sortableList.querySelectorAll("li:not(.dragging)")];
-          const pageY = e.clientY;
-
-          for (let item of items) {
-            const box = item.getBoundingClientRect();
-            const boxCenterY = box.top + box.height / 2;
-
-            if (pageY < boxCenterY) {
-              afterElement = item;
-              break;
-            }
-          }
-
-          // Highlight the target
-          items.forEach((item) => item.classList.remove("drag-over"));
-          if (afterElement) {
-            afterElement.classList.add("drag-over");
-          }
-        });
-
-        sortableList.addEventListener("dragleave", (e) => {
-          document.querySelectorAll("#sortableList li").forEach((item) => {
-            item.classList.remove("drag-over");
-          });
-        });
-
-        sortableList.addEventListener("drop", (e) => {
-          e.preventDefault();
-          document.querySelectorAll("#sortableList li").forEach((item) => {
-            item.classList.remove("drag-over");
-          });
-
-          if (draggedItem) {
-            const afterElement = document.querySelector(
-              "#sortableList .drag-over",
-            );
-            if (afterElement) {
-              sortableList.insertBefore(draggedItem, afterElement);
-            } else {
-              sortableList.appendChild(draggedItem);
-            }
-          }
-          draggedItem = null;
-        });
-      });
-    </script>
     <style>
-      #sortableList {
-        list-style-type: none;
-        padding: 0;
-        width: 200px;
-      }
-      #sortableList li {
-        padding: 10px;
-        margin: 5px;
-        background-color: #f0f0f0;
-        border: 1px solid #ccc;
-        cursor: move;
-        transition: background-color 0.2s;
-      }
-      #sortableList li.drag-over {
-        background-color: #e0e0ff;
-        border: 2px solid #4169e1;
-      }
+        .list-wrap {
+            padding: 1.5rem 0;
+            max-width: 320px;
+            margin: 0 auto;
+        }
+
+        .list-title {
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            margin-bottom: 12px;
+            letter-spacing: 0.04em;
+        }
+
+        #sortableList {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .drag-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            margin-bottom: 6px;
+            background: var(--color-background-primary);
+            border: 0.5px solid var(--color-border-tertiary);
+            border-radius: var(--border-radius-md);
+            cursor: grab;
+            -webkit-user-select: none;
+            user-select: none;
+            font-size: 15px;
+            color: var(--color-text-primary);
+            transition: border-color 0.15s, opacity 0.15s;
+        }
+
+        .drag-item:active {
+            cursor: grabbing;
+        }
+
+        .drag-item .handle {
+            opacity: 0.3;
+            font-size: 13px;
+            line-height: 1;
+        }
+
+        .drag-item.dragging {
+            opacity: 0.35;
+        }
+
+        .drag-item.drop-target {
+            border-color: var(--color-border-info);
+            background: var(--color-background-info);
+            color: var(--color-text-info);
+        }
+
+        .ghost {
+            height: 46px;
+            margin-bottom: 6px;
+            border: 1.5px dashed var(--color-border-info);
+            border-radius: var(--border-radius-md);
+            background: var(--color-background-info);
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .status {
+            margin-top: 14px;
+            font-size: 12px;
+            min-height: 18px;
+            color: var(--color-text-secondary);
+            transition: opacity 0.3s;
+        }
     </style>
-  </head>
-  <body>
-    <div>
-      <ul id="sortableList">
-        <li draggable="true">Item 1</li>
-        <li draggable="true">Item 2</li>
-        <li draggable="true">Item 3</li>
-        <li draggable="true">Item 4</li>
-        <li draggable="true">Item 5</li>
-      </ul>
+</head>
+<body>
+    <div class="list-wrap">
+        <p class="list-title">Drag to reorder</p>
+        <ul id="sortableList">
+            <li class="drag-item" draggable="true" data-id="1">Item 1</li>
+            <li class="drag-item" draggable="true" data-id="2">Item 2</li>
+            <li class="drag-item" draggable="true" data-id="3">Item 3</li>
+            <li class="drag-item" draggable="true" data-id="4">Item 4</li>
+            <li class="drag-item" draggable="true" data-id="5">Item 5</li>
+        </ul>
+        <div id="status" class="status"></div>
     </div>
-  </body>
+
+    <script>
+        (function() {
+            const list = document.getElementById('sortableList');
+            const status = document.getElementById('status');
+            let dragged = null;
+            let ghost = null;
+
+            function clearTargets() {
+                list.querySelectorAll('.drag-item').forEach(el => el.classList.remove('drop-target'));
+            }
+
+            function removeGhost() {
+                if (ghost && ghost.parentNode) ghost.parentNode.removeChild(ghost);
+                ghost = null;
+            }
+
+            function createGhost() {
+                removeGhost();
+                ghost = document.createElement('li');
+                ghost.className = 'ghost';
+                return ghost;
+            }
+
+            function getAfterElement(y) {
+                const items = [...list.querySelectorAll('.drag-item:not(.dragging)')];
+                let closest = null;
+                let closestOffset = Number.NEGATIVE_INFINITY;
+                for (const item of items) {
+                    const box = item.getBoundingClientRect();
+                    const offset = y - (box.top + box.height / 2);
+                    if (offset < 0 && offset > closestOffset) {
+                        closestOffset = offset;
+                        closest = item;
+                    }
+                }
+                return closest;
+            }
+
+            list.addEventListener('dragstart', e => {
+                const item = e.target.closest('.drag-item');
+                if (!item) return;
+                dragged = item;
+                e.dataTransfer.effectAllowed = 'move';
+                setTimeout(() => item.classList.add('dragging'), 0);
+            });
+
+            list.addEventListener('dragover', e => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                clearTargets();
+                const after = getAfterElement(e.clientY);
+                const g = createGhost();
+                if (after) {
+                    list.insertBefore(g, after);
+                    after.classList.add('drop-target');
+                } else {
+                    list.appendChild(g);
+                }
+            });
+
+            list.addEventListener('dragleave', e => {
+                if (!list.contains(e.relatedTarget)) {
+                    clearTargets();
+                    removeGhost();
+                }
+            });
+
+            list.addEventListener('drop', e => {
+                e.preventDefault();
+                if (!dragged) return;
+                const after = getAfterElement(e.clientY);
+                removeGhost();
+                clearTargets();
+                dragged.classList.remove('dragging');
+                if (after) {
+                    list.insertBefore(dragged, after);
+                } else {
+                    list.appendChild(dragged);
+                }
+                const names = [...list.querySelectorAll('.drag-item')].map(el => el.textContent.trim()).join(', ');
+                status.textContent = 'Order: ' + names;
+                dragged = null;
+            });
+
+            list.addEventListener('dragend', () => {
+                if (dragged) dragged.classList.remove('dragging');
+                clearTargets();
+                removeGhost();
+                dragged = null;
+            });
+        })();
+    </script>
+</body>
 </html>
